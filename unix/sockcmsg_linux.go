@@ -34,3 +34,14 @@ func ParseUnixCredentials(m *SocketControlMessage) (*Ucred, error) {
 	ucred := *(*Ucred)(unsafe.Pointer(&m.Data[0]))
 	return &ucred, nil
 }
+
+// Inet4PktInfo encodes IPv4 packet info into a socket control message.
+func Inet4PktInfo(pktInfo *Inet4Pktinfo) []byte {
+	b := make([]byte, CmsgSpace(SizeofInet4Pktinfo))
+	h := (*Cmsghdr)(unsafe.Pointer(&b[0]))
+	h.Level = IPPROTO_IP
+	h.Type = IP_PKTINFO
+	h.SetLen(CmsgLen(SizeofInet4Pktinfo))
+	*((*Inet4Pktinfo)(cmsgData(h))) = *pktInfo
+	return b
+}
